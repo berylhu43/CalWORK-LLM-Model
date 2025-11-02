@@ -7,7 +7,7 @@ from pipeline import TOP_K_DEFAULT, top_queries, analyze_file, init_engine, ask
 def ui():
     with gr.Blocks() as demo:
         gr.Image(
-            "/content/drive/MyDrive/CalWorks/Vector Database/Asset/cdss-logo.png",
+            "image/cdss-logo.png",
             show_label=False,
             width=500)
         gr.Markdown("### CalWORKs County QA System")
@@ -90,7 +90,7 @@ def ui():
                                outputs=map_plot)
 
         gr.Image(
-            "/content/drive/MyDrive/CalWorks/Vector Database/Asset/calworks_logo.jpeg",
+            "image/calworks_logo.jpeg",
             show_label=False,
             width=1600)
         placeholder = gr.Textbox(visible=False)

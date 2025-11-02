@@ -27,10 +27,10 @@ SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY")
 serp = SerpAPIWrapper() if SERPAPI_API_KEY else None
 
 # Configuration
-PERSIST_HF = "/content/drive/MyDrive/CalWorks/Vector Database/Output/chroma_sip_csa_db[Huggingface Embedding]"
-PERSIST_OPENAI = "/content/drive/MyDrive/CalWorks/Vector Database/Output/chroma_sip_csa_db[openai_embed3]"
+PERSIST_HF = "chroma_sip_csa_db[Huggingface Embedding]"
+PERSIST_OPENAI = "chroma_sip_csa_db[openai_embed3]"
 COLLECTION_NAME = "sip_csa_chunks"
-QUERY_LOG_PATH = "/content/drive/MyDrive/CalWorks/Vector Database/Output/query_log.json"
+QUERY_LOG_PATH = "query_log.json"
 TOP_K_DEFAULT = 5
 MAX_CHAR_LIMIT = 80000
 
@@ -169,7 +169,7 @@ def summarize_docs(docs):
             meta.get('section','?')
             }'''
         pages.append(LCDocument(page_content=header+"\n"+doc.page_content))
-    return summarizer.run(pages)
+    return summarizer.invoke({"input_documents": pages})["output_text"]
 
 
 # File analysis (text only)
@@ -181,7 +181,7 @@ def extract_text_from_file(path):
 def analyze_file(file_path, query=""):
     '''Analyze the file (currently only returns the text in the file?)'''
     # i think this function only return the first 80000 characters now
-    # definitely need to be improve
+    # definitely need to be improved
     text = extract_text_from_file(file_path)
     return text[:MAX_CHAR_LIMIT]
 
@@ -217,10 +217,11 @@ def ask(
             external response (str)
         '''
     global log
-    # if retriever is None:
-    init_engine(embed_backend, embed_model, llm_backend, llm_model)
+    if retriever is None:
+        init_engine(embed_backend, embed_model, llm_backend, llm_model)
 
-    docs = retriever.get_relevant_documents(query, k=k)
+    retriever.search_kwargs = {"k": k}
+    docs = retriever.invoke(query)
     if not docs:
       # better communication to users?
         return "No docs found.", "", ""
@@ -237,14 +238,14 @@ def ask(
             except Exception as e:
                 external = f"[Web search error: {e}]"
 
-    resp = qa_chain.invoke({
+    resp = qa_chain.run({
         "context": clean_text(summary),
         "question": clean_text(query),
         "external": clean_text(external),
         "user_context": f'''Counties: {', '.join(
             {d.metadata.get('county','') for d in docs})
             }'''
-    })["text"]
+    })
 
     t = datetime.now().isoformat()
     log[t] = {"query": query}
