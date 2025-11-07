@@ -1,4 +1,5 @@
 chroma_sip_csa_db\[Huggingface Embedding]/
+chroma_sip_csa_db\[old_Huggingface Embedding]/
 chroma_sip_csa_db\[openai_embed3]/
 *.sqlite3
 *.bin

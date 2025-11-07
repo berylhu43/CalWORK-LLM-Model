@@ -164,8 +164,6 @@ def init_engine(embed_backend, embed_model, llm_backend, llm_model):
         llm = Ollama(model=llm_model, temperature=0)
 
     summarizer = load_summarize_chain(llm, chain_type="map_reduce")
-    # splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
-    # summarizer = create_map_reduce_chain(llm, text_splitter=splitter)
     qa_chain = LLMChain(llm=llm, prompt=qa_prompt)
 
 
@@ -288,13 +286,24 @@ def ask(
         docs = retriever.invoke(query)
         summary = summarize_docs(docs)
 
+    print("\n=== Retrieved Chunks ===")
+    for d in docs:
+        meta = d.metadata
+        print("Full metadata:", meta)
+        print(
+            f"chunk_id={meta.get('chunk_id')}, "
+            f"county={meta.get('county')}, "
+            f"section={meta.get('section')}, "
+            f"page={meta.get('page')}"
+        )
+    print("=== End Retrieved Chunks ===\n")
 
     if not docs:
       # better communication to users?
         return f"No docs found. No relevant sections found for '{query}'. Try being specific", "", ""
 
     task_instruction = {
-        "single": "Summarize the key findings for this county and note comparisons with statewide averages.",
+        "single": "Summarize the key findings for this county.",
         "multi": "Compare and contrast the findings between the mentioned counties. Summarize the key findings for these counties",
         "unspecified": "Provide a concise summary based on the context."
     }[query_type]
@@ -334,6 +343,8 @@ def ask(
             }\n{doc.page_content.strip()}'''
         for i, doc in enumerate(docs)
     ])
+
+    excerpts = denormalize_text(excerpts)
 
     full_response = resp.strip() + "\n\n📚 Used Excerpts:\n\n" + excerpts
     return full_response, top_queries(), external.strip()

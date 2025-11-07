@@ -18,8 +18,8 @@ def ui():
                 value="MiniLM",
                 label="Embedding Backend")
             emb_model = gr.Dropdown(
-                ["sentence-transformers/all-MiniLM-L6-v2", "text-embedding-3-small"],
-                value="sentence-transformers/all-MiniLM-L6-v2",
+                ["sentence-transformers/all-MiniLM-L6-v2", "text-embedding-3-small", "BAAI/bge-m3"],
+                value="BAAI/bge-m3",
                 label="Embed Model")
 
         with gr.Row():
@@ -28,7 +28,7 @@ def ui():
                 value="Ollama",
                 label="LLM Backend")
             llm_model = gr.Dropdown(
-                ["smollm:135m", "mistral:7b", "gpt-3.5-turbo"],
+                ["mistral:7b", "gpt-3.5-turbo"],
                 value="mistral:7b",
                 label="LLM Model"
             )
@@ -103,7 +103,7 @@ def ui():
         demo.load(
             fn=lambda: init_engine(
                 "MiniLM",
-                "sentence-transformers/all-MiniLM-L6-v2",
+                "BAAI/bge-m3",
                 "Ollama",
                 "mistral:7b"
             ),

@@ -8,12 +8,12 @@ from chromadb.config import Settings
 from langchain_core.documents import Document  # Langchain Document storage and retrieval
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import OllamaEmbeddings
 
 # Configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 XLSX_PATH = os.path.join(BASE_DIR, "..", "chunked_sip_csa_output.xlsx")
 PERSIST_DIR = os.path.join(BASE_DIR, "..", "chroma_sip_csa_db[Huggingface Embedding]")
-# PERSIST_DIR = "../chroma_sip_csa_db[Huggingface Embedding]"
 COLLECTION  = "sip_csa_chunks"
 
 # Normalize Text
@@ -48,7 +48,11 @@ def build_vectorstore(refresh = False):
     df["section"] = df["section"].astype(str).apply(normalize_text)
 
     # Use HuggingFace embeddings
-    embedding_func = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    embedding_func = HuggingFaceEmbeddings(
+        model_name="BAAI/bge-m3",
+        model_kwargs={"device": "mps"},
+        encode_kwargs={"normalize_embeddings": True}
+    )
     # Prepare Documents for LangChain's Chroma.from_documents
     documents = [
         Document(
@@ -70,12 +74,21 @@ def build_vectorstore(refresh = False):
         print(f"Clearing existing Chroma directory: {PERSIST_DIR}")
         shutil.rmtree(PERSIST_DIR)
         print(f"Creating Chroma collection '{COLLECTION}' at '{PERSIST_DIR}'...")
-        vectorstore = Chroma.from_documents(
-            documents=documents,
-            embedding=embedding_func,
+        texts = [doc.page_content for doc in documents]
+        metadatas = [doc.metadata for doc in documents]
+
+        batch_size = 128
+        vectorstore = Chroma(
             collection_name=COLLECTION,
-            persist_directory=PERSIST_DIR
+            persist_directory=PERSIST_DIR,
+            embedding_function=embedding_func
         )
+
+        for i in range(0, len(texts), batch_size):
+            batch_texts = texts[i:i + batch_size]
+            batch_meta = metadatas[i:i + batch_size]
+            vectorstore.add_texts(batch_texts, batch_meta)
+            print(f"Embedded {i + len(batch_texts)} / {len(texts)}")
         vectorstore.persist()
         print(f"Chroma collection '{COLLECTION}' created and populated.")
         print(f"Total documents added to collection: {vectorstore._collection.count()}")
@@ -100,7 +113,7 @@ def build_vectorstore(refresh = False):
     return vectorstore
 
 if __name__ == "__main__":
-    retriever, vectorstore = build_vectorstore(refresh=False)
+    vectorstore = build_vectorstore(refresh=False)
     try:
         results = vectorstore.similarity_search("childcare support", k=2)
         print("\nSample Query Result:")
