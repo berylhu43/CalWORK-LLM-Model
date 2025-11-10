@@ -594,20 +594,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import os
+import matplotlib.colors as mcolors
 
 
 def compute_word_stats(tokens: list[str]) -> pd.DataFrame:
     """
     Compute frequency statistics for a list of tokens.
-
-    Args:
-        tokens (list[str]): A list of processed word tokens.
-
-    Returns:
-        pd.DataFrame: A DataFrame with columns:
-            - 'word': unique token
-            - 'freq': absolute frequency
-            - 'relative_freq': frequency normalized by total token count
     """
     total = len(tokens)
     if total == 0:
@@ -618,64 +610,32 @@ def compute_word_stats(tokens: list[str]) -> pd.DataFrame:
     df = pd.DataFrame(rows).sort_values("freq", ascending=False).reset_index(drop=True)
     return df
 
+import os
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+from matplotlib.colors import LinearSegmentedColormap
+from matplotlib import colors as mcolors
+import numpy as np
 
-def build_wordcloud(freq_df: pd.DataFrame, outpath: str, title: str | None = None, top_n: int = 20) -> None:
+def frequency_color_func(freq_dict):
     """
-    Generate and save a WordCloud image from a frequency DataFrame.
-
-    Args:
-        freq_df (pd.DataFrame): DataFrame from `compute_word_stats()`.
-        outpath (str): Path where the generated image will be saved.
-        title (str, optional): Optional title for the plot.
-        top_n (int, optional): Number of top words to display (default = 20).
-
-    Returns:
-        None
+    Retourne une fonction de couleur basée sur la fréquence relative
+    d'un mot : plus le mot est fréquent, plus la couleur est foncée.
     """
-    if freq_df.empty:
-        print(f"[WARN] No words to plot for {outpath}")
-        return
-
-    # Keep only the top-N most frequent words
-    freq_df_top = freq_df.head(top_n)
-    freq_dict = dict(zip(freq_df_top["word"], freq_df_top["freq"]))
-
-    if not freq_dict:
-        print(f"[WARN] Empty frequency dictionary for {outpath}")
-        return
-
-    wc = (
-        WordCloud(
-            width=1000,
-            height=800,
-            background_color="white",
-            max_words=top_n,
-            collocations=False,
-        ).generate_from_frequencies(freq_dict)
-    )
-
-    # Plot and save the WordCloud
-    fig = plt.figure(figsize=(10, 7))
-    plt.imshow(wc, interpolation="bilinear")
-    plt.axis("off")
-    if title:
-        plt.title(title, fontsize=14, pad=10)
-    plt.tight_layout()
-
-    print(f"📁 Saving wordcloud → {outpath}")
-    plt.savefig(outpath, dpi=300, bbox_inches="tight")
-    plt.close(fig)
-
+    # Normaliser les fréquences pour qu'elles soient entre 0 et 1
+    max_freq = max(freq_dict.values())
+    min_freq = min(freq_dict.values())
+    def color_func(word, font_size, position, orientation, random_state=None, **kwargs):
+        freq = freq_dict[word]
+        # Plus le mot est fréquent → valeur plus élevée → couleur plus foncée
+        norm = (freq - min_freq) / (max_freq - min_freq + 1e-5)  # éviter division par 0
+        # Gradient bleu clair → bleu foncé
+        return mcolors.to_hex((0.658*(1-norm)+0.0*norm, 0.792*(1-norm)+0.2*norm, 1*(1-norm)+0.2*norm))
+    return color_func
 
 def infer_county_name(path: str) -> str:
     """
     Extract a concise, human-readable county name from a filename.
-
-    Args:
-        path (str): File path or filename.
-
-    Returns:
-        str: Cleaned and truncated name (max 7 words).
     """
     base = os.path.basename(path)
     base_noext = os.path.splitext(base)[0]
@@ -685,6 +645,81 @@ def infer_county_name(path: str) -> str:
         label = " ".join(words[:7])
     return label
 
+def build_wordcloud(freq_df, outpath, title=None, top_n=20, show=False):
+    """
+    Generate and save (or display) a WordCloud where word size and color
+    reflect their relative frequency in the text.
+
+    The title explicitly states that this represents the top-N most frequent terms.
+
+    Args:
+        freq_df (pd.DataFrame): DataFrame with columns 'word' and 'freq'.
+        outpath (str): Path where the generated image will be saved.
+        title (str, optional): Report title (usually inferred from filename).
+        top_n (int, optional): Number of top words to include (default = 20).
+        show (bool, optional): If True, display instead of saving the figure.
+    """
+    if freq_df.empty:
+        print(f"[WARN] No words to plot for {outpath}")
+        return
+
+    # --- Keep only top-N words ---
+    freq_df_top = freq_df.head(top_n)
+    freq_dict = dict(zip(freq_df_top["word"], freq_df_top["freq"]))
+
+    # --- Custom color gradient: light blue → dark blue ---
+    blues = LinearSegmentedColormap.from_list("custom_blues", ["#a8caff", "#003366"])
+
+    # --- Generate word cloud ---
+    wc = WordCloud(
+        width=1200,
+        height=900,
+        background_color="white",
+        prefer_horizontal=0.9,
+        margin=4,
+        max_words=top_n,
+        collocations=False,
+        contour_color="#003366",
+        contour_width=1,
+        font_path="/System/Library/Fonts/Helvetica.ttc",
+        color_func = frequency_color_func(freq_dict)
+    ).generate_from_frequencies(freq_dict)
+
+    # --- Plot ---
+    fig = plt.figure(figsize=(10, 8))
+    plt.imshow(wc, interpolation="bilinear")
+    plt.axis("off")
+
+    # --- Auto-generate title if not provided ---
+    if title is None:
+        title = infer_county_name(outpath)
+
+    # --- Title styling ---
+    if title:
+        plt.suptitle(
+            title,
+            fontsize=20,
+            fontweight="bold",
+            color="#003366",
+            y=1.03,
+        )
+    plt.title(
+        f"Top {top_n} Most Frequent Words in Report",
+        fontsize=14,
+        color="#444444",
+        style="italic",
+        pad=12,
+    )
+
+    plt.tight_layout()
+
+    # --- Output ---
+    if show:
+        plt.show()
+    else:
+        print(f"Saving wordcloud → {outpath}")
+        plt.savefig(outpath, dpi=600, bbox_inches="tight")
+    plt.close(fig)
 
 # ----------------------------------------------------
 # 6. THEMATIC TOKEN GROUPS (for Simple Reporting)
@@ -1297,7 +1332,7 @@ if __name__ == "__main__":
 
     # --- Step 1. Prepare inputs ---
     try:
-        FILE_PATHS = [str(p) for p in pdf_files]  # Liste de fichiers PDF
+        FILE_PATHS = [str(p) for p in pdf_files]  # List of PDF files
     except NameError:
         raise RuntimeError(
             "Variable 'pdf_files' not defined. Ensure input PDF list is initialized before running."
@@ -1307,14 +1342,14 @@ if __name__ == "__main__":
     OUTPUT_DIR = Path(OUTPUT_DIR)
 
     # Ensure output directory exists
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)  # plus sûr que os.makedirs
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)  # safer than os.makedirs
 
     print("Launching full analysis pipeline...")
     print(f"Total files to analyze: {len(FILE_PATHS)}")
     print(f"Output directory: {OUTPUT_DIR}\n")
 
     # --- Step 2. Run main analysis ---
-    results = analyze_reports(FILE_PATHS, OUTPUT_DIR)  # <-- passer le Path, pas str()
+    results = analyze_reports(FILE_PATHS, OUTPUT_DIR)  # <-- pass the Path, not str()
 
     # --- Step 3. Print per-county summary ---
     print("==== County Summary (Collapsed Tokens) ====")
