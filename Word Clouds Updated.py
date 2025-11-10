@@ -1,4 +1,8 @@
 """
+This code is not meant to be run as-is. It serves as a reference, describing the current pipeline
+to extract and analyze key policy terms from CalWORKs County Self-Assessments (CSAs), and generate 
+word clouds and sentiment analyses.
+
 CalWORKs CSA Policy Analysis Pipeline
 -------------------------------------
 Extracts and analyzes key policy terms from CalWORKs County Self-Assessments (CSAs),
