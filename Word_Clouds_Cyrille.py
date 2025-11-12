@@ -339,34 +339,52 @@ def read_any_text(path: Path) -> str:
         return read_docx_text(path)
     else:
         return ""
-
-# ----------------------------------------------------
-# 3. STOPWORDS (policy-tuned) + GEO TERMS + LEMMATIZATION
-# ----------------------------------------------------
-# Features:
-# - Custom stopwords combining NLTK base, policy/admin terms, organizational terms, geo terms, and filler words
-# - Keeps important policy-relevant terms intact (KEEP_TERMS)
-# - Word lemmatization for noun → verb → adjective
-# - Token cleaning and filtering
-# ----------------------------------------------------
-
+    
+# ====================================================
+# ROBUST TEXT CLEANING + LEMMATIZATION + STOPWORDS
+# ====================================================
+import re
+import nltk
+from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from collections import Counter
 
+# ----------------------------------------------------
+# 0. Safe downloader
+# ----------------------------------------------------
+def _safe_download(resource, name):
+    """Ensure NLTK resources are available."""
+    try:
+        nltk.data.find(resource)
+    except LookupError:
+        nltk.download(name, quiet=True)
+
+_safe_download("corpora/wordnet", "wordnet")
+_safe_download("corpora/omw-1.4", "omw-1.4")
+_safe_download("tokenizers/punkt", "punkt")
+_safe_download("corpora/stopwords", "stopwords")
+
+# ----------------------------------------------------
+# 1. Lemmatizer & normalization
+# ----------------------------------------------------
+LEM = WordNetLemmatizer()
+
+def normalize_token(token: str) -> str:
+    """Normalize token: lowercase + lemmatize (noun→verb→adj)."""
+    t = token.lower()
+    t = LEM.lemmatize(t, pos="n")
+    t = LEM.lemmatize(t, pos="v")
+    t = LEM.lemmatize(t, pos="a")
+    return t
+
+# ----------------------------------------------------
+# 2. STOPWORDS (policy-tuned, lemmatized)
+# ----------------------------------------------------
 def build_stopwords() -> set:
-    """
-    Build a comprehensive, policy-tuned stopword set for CSA document analysis.
+    """Build a comprehensive, lemmatized stopword set for CSA document analysis."""
+    base_sw = set(stopwords.words("english"))
 
-    Combines:
-        - Standard NLTK English stopwords
-        - Administrative / metrics terms
-        - Organizational terms
-        - Geographic terms
-        - Common report filler words
-    Excludes KEEP_TERMS to preserve policy-relevant vocabulary.
-    """
-    base_sw = set(stopwords.words('english'))
-
-    # 3.1 Administrative / metrics terms
+    # 2.1 Administrative / metrics terms
     admin_metrics = {
         "achieve", "analysis", "app", "applicable", "appraisal", "application", "applications", "apps",
         "assessment", "assistance", "assist", "attendance", "average", "business", "call",
@@ -383,7 +401,7 @@ def build_stopwords() -> set:
         "supports", "timeline", "timeliness", "wtw", "population"
     }
 
-    # 3.2 Organizational / program terms
+    # 2.2 Organizational / program terms
     org_terms = {
         "agencies", "agency", "caseworker", "caseworkers", "cbos", "cdss", "cct", "center", "centers",
         "client", "clients", "collaborator", "collaborators", "customer", "customers",
@@ -393,10 +411,10 @@ def build_stopwords() -> set:
         "ore", "ota", "partner", "partners", "participant", "participants", "programmatic",
         "provider", "providers", "recipient", "recipients", "sfhsa", "specialist", "specialists",
         "staff", "staffed", "staffing", "system", "tad", "team", "teams", "ts", "unit", "units",
-        "vendor", "vendors", "vchsa", "ychhsd", "welfare", "wex", "ssd", "tws", "acssa"
-    }   
+        "vendor", "vendors", "vchsa", "ychhsd", "welfare", "wex", "ssd", "tws", "acssa", "cwes", "lcdss"
+    }
 
-    # 3.3 Geographic terms (generic + county tokens)
+    # 2.3 Geographic terms
     geo_terms = {
         "area", "areas", "bay", "cal", "california", "central", "city", "cities",
         "coast", "coastal", "county", "counties", "district", "districts", "inland",
@@ -411,7 +429,7 @@ def build_stopwords() -> set:
         "angeles", "butte", "calaveras", "colusa", "fresno", "madera", "modoc", "norte", "los"
     }
 
-    # 3.4 Common report filler words
+    # 2.4 Common report filler words
     report_filler = {
         "additional", "additionally", "also", "among", "amongst", "and", "available",
         "bad", "best", "cause", "caused", "causes", "consider", "considered", "considering",
@@ -434,7 +452,7 @@ def build_stopwords() -> set:
         "section", "social", "high", "individual", "need", "etc", "rate"
     }
 
-    # 3.5 Keep important policy-relevant terms
+    # 2.5 Keep important policy-relevant terms
     KEEP_TERMS = {
         "employment","employ","employed","job","jobs","work","workforce","wage","wages","income","earnings",
         "engagement","engage","engaged","participation","participate","sanction","sanctions","sanctioned",
@@ -447,57 +465,66 @@ def build_stopwords() -> set:
         "parent","parents","parenting","eviction","evictions","bus","transit","equitable"
     }
 
-    # Combine all sets and exclude KEEP_TERMS
-    sw = base_sw.union(admin_metrics, org_terms, geo_terms, report_filler)
-    sw = {w for w in sw if w not in KEEP_TERMS}
-    return sw
+    # Combine all sets
+    raw_sw = base_sw.union(admin_metrics, org_terms, geo_terms, report_filler)
 
-# Instantiate STOPWORDS set
+    # Normalize & lemmatize both stopwords and keep-terms
+    lemmatized_sw = {normalize_token(w) for w in raw_sw}
+    keep_terms_norm = {normalize_token(w) for w in KEEP_TERMS}
+
+    # Exclude keep terms
+    final_sw = {w for w in lemmatized_sw if w not in keep_terms_norm}
+    return final_sw
+
 STOPWORDS = build_stopwords()
 
 # ----------------------------------------------------
-# 3.6 Lemmatization setup
-# ----------------------------------------------------
-_safe_download("corpora/wordnet", "wordnet")
-_safe_download("corpora/omw-1.4", "omw-1.4")
-
-LEM = WordNetLemmatizer()
-
-def lemmatize_token(token: str) -> str:
-    """
-    Lemmatize a token in the sequence: noun → verb → adjective.
-    Returns lemmatized token as string.
-    """
-    t = LEM.lemmatize(token, pos='n')
-    t = LEM.lemmatize(t, pos='v')
-    t = LEM.lemmatize(t, pos='a')
-    return t
-
-# ----------------------------------------------------
-# 3.7 Clean and tokenize text
+# 3. Cleaning & tokenization
 # ----------------------------------------------------
 def clean_and_tokenize(text: str) -> list:
     """
-    Clean text, tokenize, lemmatize, and filter stopwords.
-    
-    Steps:
-    1. Lowercase the text
-    2. Replace hyphens and slashes with spaces
-    3. Remove non-alphabetic characters
-    4. Collapse multiple spaces
-    5. Tokenize
-    6. Lemmatize each token
-    7. Remove stopwords, short tokens (<3 chars), and numeric tokens
+    Clean text, tokenize, normalize, and remove stopwords.
     """
     text = text.lower()
     text = re.sub(r"[-/]", " ", text)
     text = re.sub(r"[^a-z\s]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
-    
+
     tokens = nltk.word_tokenize(text)
-    lemmas = [lemmatize_token(t) for t in tokens]
-    cleaned = [t for t in lemmas if t not in STOPWORDS and len(t) > 2 and not t.isnumeric()]
-    return cleaned
+    normalized = [normalize_token(t) for t in tokens if len(t) > 2 and not t.isnumeric()]
+    final_tokens = [t for t in normalized if t not in STOPWORDS]
+    return final_tokens
+
+# ----------------------------------------------------
+# 4. Diagnostic tool
+# ----------------------------------------------------
+def debug_token(word: str):
+    """Trace how a word is processed and whether it's in STOPWORDS."""
+    norm = normalize_token(word)
+    print(f"Original: '{word}' → Normalized: '{norm}'")
+    if norm in STOPWORDS:
+        print("✅ In STOPWORDS → will be removed.")
+    else:
+        print("❌ Not in STOPWORDS → will remain.")
+        close = [w for w in STOPWORDS if w.startswith(norm[:4])]
+        if close:
+            print(f"Close matches: {close[:10]}")
+
+# ----------------------------------------------------
+# 5. Example test
+# ----------------------------------------------------
+if __name__ == "__main__":
+    sample = """
+    The services provided by county staff and departments were crucial to the program outcomes.
+    Participants and caseworkers collaborated with partners to improve service delivery.
+    """
+    tokens = clean_and_tokenize(sample)
+    print("\nCLEANED TOKENS:\n", tokens)
+    print("\nTOP 10 MOST COMMON TOKENS:\n", Counter(tokens).most_common(10))
+
+    # Example debugging
+    print("\nDEBUGGING 'services':")
+    debug_token("services")
 
 # ----------------------------------------------------
 # 4. SYNONYM GROUPING (Thesaurus Collapse)
