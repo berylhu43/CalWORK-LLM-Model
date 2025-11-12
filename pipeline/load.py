@@ -8,12 +8,11 @@ from chromadb.config import Settings
 from langchain_core.documents import Document  # Langchain Document storage and retrieval
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.embeddings import OllamaEmbeddings
 
 # Configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 XLSX_PATH = os.path.join(BASE_DIR, "..", "chunked_sip_csa_output.xlsx")
-PERSIST_DIR = os.path.join(BASE_DIR, "..", "chroma_sip_csa_db[Huggingface Embedding]")
+PERSIST_DIR = os.path.join(BASE_DIR, "..","embedding", "chroma_sip_csa_db[Huggingface Embedding]")
 COLLECTION  = "sip_csa_chunks"
 
 # Normalize Text
@@ -61,8 +60,10 @@ def build_vectorstore(refresh = False):
                 "county": row["county"],
                 "report_type": row["report_type"],
                 "section": row["section"],
-                "page": row["page"],
-                "chunk_id": row["chunk_id"]  # Include chunk_id in metadata
+                "page": row["pages"],
+                "chunk_id": row["chunk_id"],  # Include chunk_id in metadata
+                "type": row["type"],
+                "is_table": row["type"] == "table"
             }
         )
         for _, row in df.iterrows()
@@ -113,7 +114,7 @@ def build_vectorstore(refresh = False):
     return vectorstore
 
 if __name__ == "__main__":
-    vectorstore = build_vectorstore(refresh=False)
+    vectorstore = build_vectorstore(refresh=True)
     try:
         results = vectorstore.similarity_search("childcare support", k=2)
         print("\nSample Query Result:")

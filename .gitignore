@@ -1,6 +1,7 @@
-chroma_sip_csa_db\[Huggingface Embedding]/
-chroma_sip_csa_db\[old_Huggingface Embedding]/
-chroma_sip_csa_db\[openai_embed3]/
+embedding\chroma_sip_csa_db\[Huggingface Embedding]/
+embedding\chroma_sip_csa_db\[old_Huggingface Embedding]/
+embedding\chroma_sip_csa_db\[openai_embed3]/
+embedding
 *.sqlite3
 *.bin
 __pycache__/

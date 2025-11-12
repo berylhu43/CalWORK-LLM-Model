@@ -28,15 +28,15 @@ SERPAPI_API_KEY = os.getenv("SERPAPI_API_KEY")
 serp = SerpAPIWrapper() if SERPAPI_API_KEY else None
 
 # Configuration
-PERSIST_HF = "chroma_sip_csa_db[Huggingface Embedding]"
-PERSIST_OPENAI = "chroma_sip_csa_db[openai_embed3]"
+PERSIST_HF = "embedding/chroma_sip_csa_db[Huggingface Embedding]"
+PERSIST_OPENAI = "embedding/chroma_sip_csa_db[openai_embed3]"
 COLLECTION_NAME = "sip_csa_chunks"
 QUERY_LOG_PATH = "query_log.json"
 TOP_K_DEFAULT = 5
 MAX_CHAR_LIMIT = 80000
 
 # Prompt template
-# we can imporve the template
+# we can improve the template
 qa_prompt = PromptTemplate(
     input_variables=["context", "question", "external", "user_context"],
     template="""

@@ -1,8 +1,10 @@
 import os
 import re
 import fitz  # PyMuPDF
+import pymupdf
+import pymupdf.layout
 import pandas as pd
-from langchain_text_splitters import RecursiveCharacterTextSplitter # Langchain update the module name as langchain_text_splitters
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 # Configuration
 PDF_DIRECTORY = "/content/drive/MyDrive/CalWorks/Vector Database/PDFs"  # Set this to your PDF folder path
@@ -169,7 +171,7 @@ def main():
     chunks = chunk_sections(all_sections)
     print(f"\n{len(all_sections)} sections to {len(chunks)} chunks")
 
-    output_path = os.path.join(OUTPUT_DIRECTORY, "chunked_sip_csa_output.xlsx")
+    output_path = os.path.join(OUTPUT_DIRECTORY, "test_output.xlsx")
     df = pd.DataFrame(chunks)
     df.to_excel(output_path, index=False)
     print(f"Saved to {output_path}")
