@@ -114,7 +114,7 @@ def build_vectorstore(refresh = False):
     return vectorstore
 
 if __name__ == "__main__":
-    vectorstore = build_vectorstore(refresh=True)
+    vectorstore = build_vectorstore(refresh=False)
     try:
         results = vectorstore.similarity_search("childcare support", k=2)
         print("\nSample Query Result:")
