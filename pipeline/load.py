@@ -11,7 +11,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 
 # Configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-XLSX_PATH = os.path.join(BASE_DIR, "..", "chunked_sip_csa_output.xlsx")
+XLSX_PATH = os.path.join(BASE_DIR, "..", "data", "chunked_sip_csa_output.xlsx")
 PERSIST_DIR = os.path.join(BASE_DIR, "..","embedding", "chroma_sip_csa_db[Huggingface Embedding]")
 COLLECTION  = "sip_csa_chunks"
 
