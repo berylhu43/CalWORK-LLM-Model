@@ -1,18 +1,17 @@
-{"text": "Field : Employment Rate", "metadata": {"sheet": "Data Sources", "row_index": 2}}
-{"text": "Field : Wage Progression", "metadata": {"sheet": "Data Sources", "row_index": 3}}
-{"text": "Field : Post CalWORKs Employment Rate", "metadata": {"sheet": "Data Sources", "row_index": 4}}
-{"text": "Field : Exit with Earnings", "metadata": {"sheet": "Data Sources", "row_index": 5}}
-{"text": "Field : Program Reentry", "metadata": {"sheet": "Data Sources", "row_index": 6}}
-{"text": "Field : Reentry after Exit with Earnings", "metadata": {"sheet": "Data Sources", "row_index": 7}}
-{"text": "Field : Orientation Attendance Rate", "metadata": {"sheet": "Data Sources", "row_index": 8}}
-{"text": "Field : OCAT Timeliness Rate", "metadata": {"sheet": "Data Sources", "row_index": 9}}
-{"text": "Field : First Activity Rate", "metadata": {"sheet": "Data Sources", "row_index": 10}}
-{"text": "Field : Engagement Rate", "metadata": {"sheet": "Data Sources", "row_index": 11}}
-{"text": "Field : Sanction Rate", "metadata": {"sheet": "Data Sources", "row_index": 12}}
-{"text": "Field : Sanction Resolution Rate", "metadata": {"sheet": "Data Sources", "row_index": 13}}
-{"text": "Field : Ancillary Access Rate", "metadata": {"sheet": "Data Sources", "row_index": 14}}
-{"text": "Field : OCAT Appraisal to Next Activity", "metadata": {"sheet": "Data Sources", "row_index": 15}}
-{"text": "Field : Education and Skills Dev Rate", "metadata": {"sheet": "Data Sources", "row_index": 16}}
-{"text": "Field : Family Stabilization WTW Engagement Rate", "metadata": {"sheet": "Data Sources", "row_index": 17}}
-{"text": "Field : Key for tables within workbook:  Cells marked as an asterisk have been deidentified.", "metadata": {"sheet": "Data Sources", "row_index": 18}}
-{"text": "Field : End of Worksheet", "metadata": {"sheet": "Data Sources", "row_index": 19}}
+{"text": "Field : Employment Rate", "metadata": {"sheet": "Data Sources", "row_index": 2, "county": null}}
+{"text": "Field : Wage Progression", "metadata": {"sheet": "Data Sources", "row_index": 3, "county": null}}
+{"text": "Field : Post CalWORKs Employment Rate", "metadata": {"sheet": "Data Sources", "row_index": 4, "county": null}}
+{"text": "Field : Exit with Earnings", "metadata": {"sheet": "Data Sources", "row_index": 5, "county": null}}
+{"text": "Field : Program Reentry", "metadata": {"sheet": "Data Sources", "row_index": 6, "county": null}}
+{"text": "Field : Reentry after Exit with Earnings", "metadata": {"sheet": "Data Sources", "row_index": 7, "county": null}}
+{"text": "Field : Orientation Attendance Rate", "metadata": {"sheet": "Data Sources", "row_index": 8, "county": null}}
+{"text": "Field : OCAT Timeliness Rate", "metadata": {"sheet": "Data Sources", "row_index": 9, "county": null}}
+{"text": "Field : First Activity Rate", "metadata": {"sheet": "Data Sources", "row_index": 10, "county": null}}
+{"text": "Field : Engagement Rate", "metadata": {"sheet": "Data Sources", "row_index": 11, "county": null}}
+{"text": "Field : Sanction Rate", "metadata": {"sheet": "Data Sources", "row_index": 12, "county": null}}
+{"text": "Field : Sanction Resolution Rate", "metadata": {"sheet": "Data Sources", "row_index": 13, "county": null}}
+{"text": "Field : Ancillary Access Rate", "metadata": {"sheet": "Data Sources", "row_index": 14, "county": null}}
+{"text": "Field : OCAT Appraisal to Next Activity", "metadata": {"sheet": "Data Sources", "row_index": 15, "county": null}}
+{"text": "Field : Education and Skills Dev Rate", "metadata": {"sheet": "Data Sources", "row_index": 16, "county": null}}
+{"text": "Field : Family Stabilization WTW Engagement Rate", "metadata": {"sheet": "Data Sources", "row_index": 17, "county": null}}
+{"text": "Field : Key for tables within workbook:  Cells marked as an asterisk have been deidentified.", "metadata": {"sheet": "Data Sources", "row_index": 18, "county": null}}

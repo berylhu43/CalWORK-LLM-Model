@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 import gradio as gr
 
 # Load county-level outcome data
-map_df = pd.read_csv("[GIS]ca_counties_outcome.csv")
+map_df = pd.read_csv("data/[GIS]ca_counties_outcome.csv")
 
 # The 15 outcome metrics you want to visualize
 OUTCOME_METRICS = [

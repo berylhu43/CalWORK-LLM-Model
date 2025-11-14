@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from openpyxl import load_workbook
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -36,6 +37,9 @@ def load_table_streaming(xlsx_path):
                 # 跳过空行
                 if all(v is None for v in row):
                     continue
+                # Skip the last row if it contains "End of worksheet"
+                if any(isinstance(v, str) and "end of worksheet" in v.lower() for v in row if v):
+                    continue
 
                 # 构造记录
                 record_text = "; ".join(
@@ -44,11 +48,15 @@ def load_table_streaming(xlsx_path):
                     if val is not None
                 )
 
+                match = re.search(r"County: ([^;]+)", record_text)
+                county = match.group(1).strip() if match else None
+
                 record = {
                     "text": record_text,
                     "metadata": {
                         "sheet": sheet,
-                        "row_index": idx
+                        "row_index": idx,
+                        "county": county
                     }
                 }
 
