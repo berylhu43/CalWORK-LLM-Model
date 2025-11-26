@@ -1,6 +1,23 @@
 import gradio as gr
 from GIS_map import OUTCOME_METRICS, plot_outcome_map, COUNTIES
 from application import TOP_K_DEFAULT, top_queries, init_engine, ask
+from application import current_settings
+
+def handle_click(question, model):
+    # force reset
+    current_settings["embed_backend"] = None
+    current_settings["embed_model"] = None
+    current_settings["llm_backend"] = None
+    current_settings["llm_model"] = None
+
+    return ask(
+        question,
+        5,
+        "BAAI" if model.startswith("mistral") else "OpenAI Embeddings",
+        "BAAI/bge-m3" if model.startswith("mistral") else "text-embedding-3-small",
+        "Ollama" if model.startswith("mistral") else "OpenAI",
+        model
+    )
 
 
 # Build Gradio UI
@@ -95,11 +112,7 @@ def ui():
         )
 
         go.click(
-            lambda question, model: ask(question, 5,
-                "BAAI" if model.startswith("mistral") else "OpenAI Embeddings",
-                "BAAI/bge-m3" if model.startswith("mistral") else "text-embedding-3-large",
-                "Ollama" if model.startswith("mistral") else "OpenAI",
-                model),
+            handle_click,
             inputs=[qbox, llm_model],
             outputs=answer
         )

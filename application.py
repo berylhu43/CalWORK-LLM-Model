@@ -292,13 +292,16 @@ def ask(
         query_type = "multi"
     else:
         query_type = "unspecified"
-    #
-    # docs_sip = retriever1.invoke(query)
-    # docs_json = retriever2.invoke(query)
+
 
 
     docs_sip_with_score = retriever1.vectorstore.similarity_search_with_score(query, k=k)
-    docs_json_with_score = retriever2.vectorstore.similarity_search_with_score(query, k=k)
+    docs_json_with_score = []
+    if embed_backend == "BAAI":
+        docs_json_with_score = retriever2.vectorstore.similarity_search_with_score(query, k=k)
+    else:
+        print("Skipping JSONL vectorstore (no OpenAI embedding available).")
+    # docs_json_with_score = retriever2.vectorstore.similarity_search_with_score(query, k=k)
 
     query_lower = query.lower()
 
