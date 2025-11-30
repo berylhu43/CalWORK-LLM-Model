@@ -26,64 +26,93 @@ def ui():
         gr.HTML("""
         <style>
           body { 
-              background-color: #1e1e1e !important; 
-              color: #e8e8e8 !important;
+              background-color: #ffffff !important; 
+              color: #000000 !important;
           }
+          
+          h3 {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
 
           .main-title { 
               font-size: 32px; 
               font-weight: 700; 
               margin-bottom: 10px; 
-              color: #ffffff;
+              color: #333333;
           }
 
           .section-box {
-              background: #2a2a2a;
-              padding: 18px;
-              border-radius: 10px;
-              border: 1px solid #3a3a3a;
-              box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-              margin-bottom: 18px;
+              background: #ffffff;
+              padding: 5px;
+              margin-bottom: 5px;
           }
 
-          /* The answer area */
           .answer-box {
-              background: #2f3136;
+              background: #f5f5f5;
               border-radius: 10px;
               padding: 20px;
               font-size: 18px;
               line-height: 1.6;
-              border: 1px solid #3a3a3a;
+              border: 1px solid #cccccc;
               min-height: 200px;
-              color: #ffffff;
+              color: #000000;
               white-space: pre-wrap;
           }
 
-          /* Placeholder text */
           .answer-box em {
               color: #9aa0a6;
           }
 
-          /* Fix Gradio dark text issues */
-          label, .gradio-container * {
-              color: #e8e8e8 !important;
+          input, textarea, select {
+              background-color: #ffffff !important;
+              color: #000000 !important;
+              border: none !important;
+              box-shadow: none !important;
           }
 
-          input, textarea, select {
-              background-color: #2a2a2a !important;
-              color: #ffffff !important;
-              border: 1px solid #3a3a3a !important;
+          .gr-block, .gr-box, .gr-group, .gr-panel, .gr-row {
+              background: transparent !important;
+              border: none !important;
+              box-shadow: none !important;
           }
 
           .gr-button {
               background-color: #4b5563 !important;
-              color: white !important;
+              color: #ffffff !important;
               border-radius: 8px !important;
               border: none !important;
           }
 
           .gr-button:hover {
               background-color: #6b7280 !important;
+          }
+
+          #answer-btn {
+              height: 48px;
+              width: 80px;
+              margin-left: 10px;
+              background-color: #4b5563 !important;
+              color: white !important;
+              border-radius: 6px !important;
+              border: none !important;
+          }
+
+          #answer-btn:hover {
+              background-color: #6b7280 !important;
+          }
+
+          .input-with-button {
+              width: 100%;
+          }
+
+          #question-row {
+              position: relative;
+          }
+
+          #question-box input {
+              padding-right: 10px !important;
+              font-size: 18px !important;
           }
         </style>
         """)
@@ -93,18 +122,26 @@ def ui():
             width=500)
         gr.HTML("<div class='main-title'>CalWORKs County QA System</div>")
 
-        with gr.Group(elem_classes="section-box"):
-            with gr.Row():
-                llm_model = gr.Dropdown(
-                    ["mistral:7b", "gpt-3.5-turbo"],
-                    value="mistral:7b",
-                    label="LLM Model"
-                )
+        gr.HTML("<h3 style='margin:0; padding:0; font-size:22px;'>LLM Model</h3>")
+        with gr.Row():
+            llm_model = gr.Dropdown(
+                ["mistral:7b", "gpt-3.5-turbo"],
+                value="mistral:7b",
+                label=""
+            )
+        gr.HTML("<h3 style='margin:0; padding:0; font-size:22px;'>Question</h3>")
+        gr.HTML("<div class='input-with-button'>")
 
-        with gr.Group(elem_classes="section-box"):
-            with gr.Row():
-                qbox = gr.Textbox(label="Question", scale=3)
-                go = gr.Button("Answer", scale=1)
+        with gr.Row(elem_id="question-row"):
+            qbox = gr.Textbox(
+                label="",
+                placeholder="Type your question here...",
+                elem_id="question-box",
+                scale=5
+            )
+            go = gr.Button("Ans", elem_id="answer-btn", scale=1)
+
+        gr.HTML("</div>")
 
         answer = gr.HTML(
             "<div class='answer-box'><em>Answer will appear here...</em></div>",
@@ -117,24 +154,21 @@ def ui():
             outputs=answer
         )
 
+        gr.HTML("<h3 style='margin:0; padding:0; font-size:22px;'>Top Queries</h3>")
+        gr.Textbox(value=top_queries(), interactive=False, lines=10, label="")
 
-        with gr.Group(elem_classes="section-box"):
-            gr.Markdown("### Top Queries")
-            gr.Textbox(value=top_queries(), interactive=False, lines=10, label="")
-
-        with gr.Group(elem_classes="section-box"):
-            gr.Markdown("### County Outcome Map")
-            metric_dd = gr.Dropdown(
-                choices=OUTCOME_METRICS,
-                value=OUTCOME_METRICS[0],
-                label="Metric")
-            map_plot = gr.Plot(label="Map")
-            demo.load(plot_outcome_map,
-                      inputs=[metric_dd],
-                      outputs=map_plot)
-            metric_dd.change(plot_outcome_map,
-                             inputs=[metric_dd],
-                             outputs=map_plot)
+        gr.HTML("<h3 style='margin:0; padding:0; font-size:22px;'>County Outcome Map</h3>")
+        metric_dd = gr.Dropdown(
+            choices=OUTCOME_METRICS,
+            value=OUTCOME_METRICS[0],
+            label="Metric")
+        map_plot = gr.Plot(label="Map")
+        demo.load(plot_outcome_map,
+                  inputs=[metric_dd],
+                  outputs=map_plot)
+        metric_dd.change(plot_outcome_map,
+                         inputs=[metric_dd],
+                         outputs=map_plot)
 
         gr.Image(
             "image/calworks_logo.jpeg",
