@@ -49,7 +49,7 @@ def build_vectorstore(refresh = False):
     # Use HuggingFace embeddings
     embedding_func = HuggingFaceEmbeddings(
         model_name="BAAI/bge-m3",
-        model_kwargs={"device": "cuda"},
+        model_kwargs={"device": "cpu"}, # change to cuda if using gpu
         encode_kwargs={"normalize_embeddings": True}
     )
     # Prepare Documents for LangChain's Chroma.from_documents
@@ -100,22 +100,13 @@ def build_vectorstore(refresh = False):
             embedding_function=embedding_func
         )
 
-    # Create retriever
-    # retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
-
-    # Run a query
-    # docs = retriever.invoke("childcare support")
-    # for i, doc in enumerate(docs):
-    #     print(f"\n--- Document {i + 1} ---")
-    #     print(f"Metadata: {doc.metadata}")
-    #     print(f"Content: {doc.page_content[:300]}...")
 
     print("Retriever ready for queries.")
     return vectorstore
 
 if __name__ == "__main__":
-    vectorstore = build_vectorstore(refresh=False)
-    try:
+    vectorstore = build_vectorstore(refresh=False) # change to True if need to rebuild the database
+    try: # run a test
         results = vectorstore.similarity_search("childcare support", k=2)
         print("\nSample Query Result:")
         for i, r in enumerate(results):

@@ -1,5 +1,4 @@
 import gradio as gr
-from GIS_map import OUTCOME_METRICS, plot_outcome_map, COUNTIES
 from application import TOP_K_DEFAULT, top_queries, init_engine, ask
 from application import current_settings
 
@@ -78,7 +77,7 @@ def ui():
           }
 
           .gr-button {
-              background-color: #4b5563 !important;
+              background-color: #e6eaf0 !important;
               color: #ffffff !important;
               border-radius: 8px !important;
               border: none !important;
@@ -92,8 +91,8 @@ def ui():
               height: 48px;
               width: 80px;
               margin-left: 10px;
-              background-color: #4b5563 !important;
-              color: white !important;
+              background-color: #e6eaf0 !important;
+              color: black !important;
               border-radius: 6px !important;
               border: none !important;
           }
@@ -116,10 +115,7 @@ def ui():
           }
         </style>
         """)
-        gr.Image(
-            "image/cdss-logo.png",
-            show_label=False,
-            width=500)
+
         gr.HTML("<div class='main-title'>CalWORKs County QA System</div>")
 
         gr.HTML("<h3 style='margin:0; padding:0; font-size:22px;'>LLM Model</h3>")
@@ -157,23 +153,14 @@ def ui():
         gr.HTML("<h3 style='margin:0; padding:0; font-size:22px;'>Top Queries</h3>")
         gr.Textbox(value=top_queries(), interactive=False, lines=10, label="")
 
-        gr.HTML("<h3 style='margin:0; padding:0; font-size:22px;'>County Outcome Map</h3>")
-        metric_dd = gr.Dropdown(
-            choices=OUTCOME_METRICS,
-            value=OUTCOME_METRICS[0],
-            label="Metric")
-        map_plot = gr.Plot(label="Map")
-        demo.load(plot_outcome_map,
-                  inputs=[metric_dd],
-                  outputs=map_plot)
-        metric_dd.change(plot_outcome_map,
-                         inputs=[metric_dd],
-                         outputs=map_plot)
 
         gr.Image(
-            "image/calworks_logo.jpeg",
+            "image/cdss-logo.png",
             show_label=False,
-            width=1600)
+            width=500,
+            height=150
+        )
+
         placeholder = gr.Textbox(visible=False)
 
         demo.load(

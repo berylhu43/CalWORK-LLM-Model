@@ -1,7 +1,7 @@
 import os
 import json
 import re
-from pipeline.extraction_transformation import county_names
+from pipeline.extraction_pdf import county_names
 from pipeline.load_xl import denormalize_text
 from datetime import datetime
 from collections import defaultdict
@@ -40,7 +40,7 @@ MAX_CHAR_LIMIT = 80000
 # Prompt template
 # we can improve the template
 qa_prompt = PromptTemplate(
-    input_variables=["context", "question", "external", "user_context"],
+    input_variables=["context", "question", "user_context"],
     template="""
 You are a policy data analyst summarizing county self-assessment reports for the California Department of Social Services (CalWORKs).
 Use the information in the **context** to answer the **question** accurately, with correct statistics and clear comparisons.
@@ -122,26 +122,6 @@ current_settings = {
     "llm_model": None
 }
 
-# def merged_search(query, k, retriever_sip, retriever_json):
-#     # retrieve from both db
-#     docs1 = retriever_sip.invoke(query)
-#     docs2 = retriever_json.invoke(query)
-#
-#     # add source name
-#     for d in docs1:
-#         d.metadata["source"] = "sip_csa"
-#
-#     for d in docs2:
-#         d.metadata["source"] = "dashboard_json"
-#
-#     # merge two search result
-#     merged = docs1 + docs2
-#
-#     # return in sorted score
-#     merged_sorted = sorted(merged, key=lambda d: d.metadata.get("score", 0), reverse=True)
-#
-#     # get top k
-#     return merged_sorted[:k]
 
 # Initialization function supporting Ollama and OpenAI
 def init_engine(embed_backend, embed_model, llm_backend, llm_model):

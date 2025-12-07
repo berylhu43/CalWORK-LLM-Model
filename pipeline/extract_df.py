@@ -199,11 +199,6 @@ def save_stats_json(all_stats, path="all_stats.json"):
         json.dump(all_stats, f, indent=2)
     print(f"Saved stats JSON to {path}")
 
-# tables = load_tables()
-# structured_data = split_by_county(tables)
-# grouped_data = to_group(structured_data)
-# all_stats = compute_all_stats(grouped_data)
-# save_stats_json(all_stats, os.path.join(BASE_DIR, "..", "data", "dashboard_quant_stats.json"))
 
 if __name__ == '__main__':
     tables = load_tables()

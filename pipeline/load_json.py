@@ -16,7 +16,7 @@ def build_jsonl_vectorstore(refresh=False):
 
     embedding_func = HuggingFaceEmbeddings(
         model_name="BAAI/bge-m3",
-        model_kwargs={"device": "cpu"},
+        model_kwargs={"device": "cpu"}, # change to cuda if run on gpu
         encode_kwargs={"normalize_embeddings": True}
     )
 
@@ -62,7 +62,7 @@ def build_jsonl_vectorstore(refresh=False):
     return vectorstore
 
 if __name__ == "__main__":
-    vs = build_jsonl_vectorstore(refresh=False)
+    vs = build_jsonl_vectorstore(refresh=False) # change to True if need to rebuild the database
     results = vs.similarity_search("orientation attendance Alameda", k=2)
     for i, r in enumerate(results):
         print(f"\nResult {i+1}: {r.page_content[:300]}")
