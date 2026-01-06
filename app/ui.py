@@ -155,7 +155,7 @@ def ui():
 
 
         gr.Image(
-            "image/cdss-logo.png",
+            "asset/cdss-logo.png",
             show_label=False,
             width=500,
             height=150
