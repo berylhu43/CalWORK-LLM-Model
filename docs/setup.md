@@ -221,19 +221,35 @@ load_json.py
 ```
 The *extract_df.py* file extracts information from CalOAR data dashboard.
 
-You can find the raw dashboard data under *root/data/dashboard_raw_data.xlsx*.
+You can find the raw dashboard data under
+```text
+root/data/dashboard_raw_data.xlsx
+```
 
-Run *extract_df.py*.It will save a JSON file to the data folder.
+Run *extract_df.py*. It will save a JSON file to the data folder. 
 
-The new file will be *root/data/dashboard_quant_stats.json*
+The new file will be 
+```text
+root/data/dashboard_quant_stats.json
+```
 
-This JSON file contains statistical results from the data dashboard. 
+This file contains machine-readable quantitative statistics, but is not yet suitable for direct embedding.
+Embedding models require natural-language inputs rather than raw numeric tables.
 
-Before embedding, we still need to convert it into the languages the embedding model understands.
+To convert dashboard statistics into descriptive text, run:
+```bash
+python pipeline/json_stats_to_docs.py
+```
 
-To do this, run the *pipeline/json_stats_to_docs.py*. It will save a new JSON file to the data folder *root/data/dashboard_quant_docs.json*.
+It will save a new JSON file to the data folder 
+```text
+root/data/dashboard_quant_docs.json
+```
 
-Now, you can safely run the file *load_json.py* for embedding. Follow the steps in *Extract PDF* for your device setting. 
+Now, you can safely run the file *load_json.py* for embedding. 
+>⚠️ Important:
+Ensure that your environment and device settings (local vs. cloud embeddings) are configured correctly.
+Follow the same setup instructions described in Extract PDF Data before running this step.
 
 # Interface
 
