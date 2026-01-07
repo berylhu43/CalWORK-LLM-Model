@@ -83,9 +83,15 @@ This project works with the following data types:
 ```
 
 ## How to Run
-Install dependencies: pip install -r requirements.txt
+Install dependencies: 
+```bash
+pip install -r requirements.txt
+```
 
-Launch the application: python app/ui.py
+Launch the application: 
+```bash
+python app/ui.py
+```
 
 ## Project Status
 
