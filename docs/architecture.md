@@ -2,6 +2,14 @@
 
 ## 1. Design Goals
 
+The primary design goal of this system is to support accurate, transparent, and policy-relevant analysis of county-level CalWORKs performance data. The system is intended to assist analysts and policymakers in exploring both qualitative self-assessment narratives (CSA/SIP reports) and quantitative outcome trends (Cal-OAR dashboard data) through a unified question-answering interface.
+
+A key objective is to preserve the integrity of the underlying data. Rather than generating speculative or overly generalized responses, the system prioritizes faithful summarization of retrieved evidence, explicit citation of source material, and clear communication of uncertainty when data are missing, limited, or inconsistent across sources. This is particularly important in a government and policy context, where analytical conclusions may inform program evaluation or administrative decision-making.
+
+The system is also designed with flexibility and extensibility in mind. By modularizing the embedding layer, retrieval strategy, and language model backend, the architecture allows for rapid experimentation with alternative models and retrieval configurations without restructuring the entire pipeline. This design supports future expansion to additional datasets, indicators, or reporting periods while maintaining reproducibility and transparency.
+
+Finally, data governance and operational constraints are treated as first-class considerations. The system is designed to operate in environments where external API calls may be restricted, enabling local deployment of both embedding models and large language models when required. This ensures that sensitive administrative data can be analyzed securely while still benefiting from modern retrieval-augmented generation techniques.
+
 ---
 
 ## 2. High-Level Overview
@@ -18,7 +26,9 @@ Below is the flowchart of the overall model architecture
 
 ## 3. Offline Data Pipeline
 
-![Database Setup Overview](architecture/data_extract.png)
+<p align="center">
+  <img src="architecture/data_extract.png" width="600">
+</p>
 
 The two main processes of building the initial vector databases are extraction and embedding.
 The databases contain three main sources of raw data: CAS reports, SIP reports, and the CalOAR Data Dashboard. 
@@ -64,11 +74,11 @@ The reports include text, tables, and charts. If we store the table as plain tex
 Below is an example from the Los Angeles CSA report (page 17). 
 
 <p align="center">
-    <img src="architecture/mix_report.png">
+    <img src="architecture/mix_report.png" width="600">
 <p>
 
 <p align="center">
-    <img src="architecture/mix_store.png">
+    <img src="architecture/mix_store.png" width="600">
 <p>
 
 ### Dashboard processing
@@ -82,13 +92,13 @@ Except for the tables on Employment Rate, Wage Progression, Post-CalWORKS Employ
 One example of a useful table is the Employment Rate table. Although it has some missing values, it contains a substantial amount of data.
 
 <p align="center">
-    <img src="architecture/useful_table.png">
+    <img src="architecture/useful_table.png" width="600">
 <p>
 
 One example of a hard-to-use table is the Sanction Resolution Rate. We can see it contains mostly missing values.
 
 <p align="center">
-    <img src="architecture/unuseful_table.png">
+    <img src="architecture/unuseful_table.png" width="600">
 <p>
 
 Data from each relevant dashboard will be grouped by county name, category, and subcategory. 
@@ -105,7 +115,7 @@ After generating the statistical results, we need to convert them into a format 
 To do this, we concatenate the numerical values into a structured sentence and store it in a separate file. 
 
 <p align="center">
-    <img src="architecture/final_json_sis.png">
+    <img src="architecture/final_json_sis.png" width="600">
 <p>
 
 
@@ -121,7 +131,7 @@ The model's backend is built on the **RAG** architecture, which stands for retri
 
 Below is the RAG pipeline flowchart. I will go through the process step by step.
 <p align="center">
-    <img src="architecture/RAG.png">
+    <img src="architecture/RAG.png" width="600">
 <p>
 
 ### Retrieval
@@ -155,7 +165,7 @@ Since there can be discrepancies between the CSA/SIP reports and the data dashbo
 The model summarizes the findings and notes that *“it’s important to note that these trends may differ for specific gender groups.”*
 
 <p align="center">
-    <img src="architecture/sample_result.png">
+    <img src="architecture/sample_result.png" width="600">
 <p>
 
 ### Generation
@@ -164,17 +174,17 @@ The final step, Generation, will provide users with a summary of the findings an
 
 **Summary**
 <p align="center">
-    <img src="architecture/summary.png">
+    <img src="architecture/summary.png" width="600">
 <p>
 
 **CSA report excerpt**
 <p align="center">
-    <img src="architecture/CSA.png">
+    <img src="architecture/CSA.png" width="600">
 <p>
 
 **Data-dashboard excerpt**
 <p align="center">
-    <img src="architecture/dashboard.png">
+    <img src="architecture/dashboard.png" width="600">
 <p>
 
 ## 5. Model & Design Decisions
